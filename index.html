@@ -651,7 +651,7 @@
         </div>
       </div>
       <div class="toolbar">
-        <button class="btn ghost" id="configBtn" type="button" title="Firebase 설정">설정</button>
+        <button class="btn ghost" id="configBtn" type="button" title="Firebase 설정">Firebase 설정</button>
         <button class="btn primary" id="addBtn" type="button">구독 추가</button>
       </div>
     </header>
@@ -877,6 +877,7 @@
       firebaseReady: false,
       dbRef: null,
       firebaseApi: null,
+      firebaseUserId: null,
       lastUndo: null,
       saveTimer: null,
       suppressSave: false
@@ -1000,10 +1001,22 @@
       const raw = localStorage.getItem(storageKeys.config);
       if (!raw) return null;
       try {
-        return JSON.parse(raw);
+        return parseFirebaseConfigInput(raw);
       } catch {
         return null;
       }
+    }
+
+    function parseFirebaseConfigInput(raw) {
+      let text = raw.trim();
+      const configMatch = text.match(/firebaseConfig\s*=\s*(\{[\s\S]*?\})\s*;?/);
+      if (configMatch) text = configMatch[1];
+      text = text
+        .replace(/\/\/.*$/gm, "")
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/([{,]\s*)([A-Za-z_$][\w$]*)\s*:/g, '$1"$2":')
+        .replace(/,\s*}/g, "}");
+      return JSON.parse(text);
     }
 
     function workspaceId() {
@@ -1037,19 +1050,25 @@
         if (!state.firebaseApi) {
           const appMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
           const dbMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js");
+          const authMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js");
           state.firebaseApi = {
             initializeApp: appMod.initializeApp,
             getApps: appMod.getApps,
             getDatabase: dbMod.getDatabase,
             ref: dbMod.ref,
             onValue: dbMod.onValue,
-            set: dbMod.set
+            set: dbMod.set,
+            getAuth: authMod.getAuth,
+            signInAnonymously: authMod.signInAnonymously
           };
         }
         const api = state.firebaseApi;
         const app = api.getApps().length ? api.getApps()[0] : api.initializeApp(config);
+        const auth = api.getAuth(app);
+        const credential = auth.currentUser ? { user: auth.currentUser } : await api.signInAnonymously(auth);
+        state.firebaseUserId = credential.user.uid;
         const db = api.getDatabase(app);
-        state.dbRef = api.ref(db, `subscriptionApps/${workspaceId()}/subscriptions`);
+        state.dbRef = api.ref(db, `users/${state.firebaseUserId}/subscriptions`);
         api.onValue(state.dbRef, (snapshot) => {
           state.suppressSave = true;
           const data = snapshot.val();
@@ -1057,7 +1076,7 @@
           saveLocal();
           render();
           state.suppressSave = false;
-          setSyncStatus("on", "Firebase 동기화");
+          setSyncStatus("on", "Firebase 개인 동기화");
         }, (error) => {
           state.firebaseReady = false;
           setSyncStatus("off", "동기화 오류");
@@ -1419,13 +1438,14 @@
       const raw = $("#firebaseConfig").value.trim();
       const selectedMode = $("#syncMode").value;
       if (selectedMode === "firebase") {
+        let parsedConfig;
         try {
-          JSON.parse(raw);
+          parsedConfig = parseFirebaseConfigInput(raw);
         } catch {
-          showToast("Firebase 설정은 JSON 형식으로 입력해 주세요.");
+          showToast("Firebase 설정 코드를 다시 확인해 주세요.");
           return;
         }
-        localStorage.setItem(storageKeys.config, raw);
+        localStorage.setItem(storageKeys.config, JSON.stringify(parsedConfig, null, 2));
       }
       localStorage.setItem(storageKeys.workspace, $("#workspaceId").value.trim() || "gudok-hannune");
       localStorage.setItem(storageKeys.mode, selectedMode);
