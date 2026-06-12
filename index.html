@@ -866,13 +866,14 @@
     ];
 
     const defaultFirebaseConfig = {
-      apiKey: "",
-      authDomain: "",
-      databaseURL: "",
-      projectId: "",
-      storageBucket: "",
-      messagingSenderId: "",
-      appId: ""
+      apiKey: "AIzaSyBikgmNaPltrPnzObBvyO9VgY2OLLlVix8",
+      authDomain: "gudok-hannune-b801c.firebaseapp.com",
+      databaseURL: "https://gudok-hannune-b801c-default-rtdb.firebaseio.com",
+      projectId: "gudok-hannune-b801c",
+      storageBucket: "gudok-hannune-b801c.firebasestorage.app",
+      messagingSenderId: "982540097466",
+      appId: "1:982540097466:web:fd4dbceb5afffd5a342f83",
+      measurementId: "G-JKW4MPXJ7E"
     };
 
     const sampleSubscriptions = [];
@@ -1006,15 +1007,8 @@
     }
 
     function currentConfig() {
-      const saved = localStorage.getItem(storageKeys.config);
-      if (!saved) return defaultFirebaseConfig;
-      try {
-        return JSON.parse(saved);
-      } catch {
-        return defaultFirebaseConfig;
-      }
+      return defaultFirebaseConfig;
     }
-
     function parseFirebaseConfigInput(raw) {
       let text = raw.trim();
       const configMatch = text.match(/firebaseConfig\s*=\s*(\{[\s\S]*?\})\s*;?/);
@@ -1033,9 +1027,8 @@
     }
 
     function mode() {
-      return localStorage.getItem(storageKeys.mode) || "firebase";
+      return "firebase";
     }
-
     function setSyncStatus(type, text) {
       const dot = $("#syncDot");
       dot.className = "dot " + type;
@@ -1470,6 +1463,7 @@
   </script>
 </body>
 </html>
+
 
 
 
