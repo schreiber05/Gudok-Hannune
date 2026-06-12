@@ -1009,13 +1009,7 @@
     }
 
     function currentConfig() {
-      const raw = localStorage.getItem(storageKeys.config);
-      if (!raw) return defaultFirebaseConfig;
-      try {
-        return parseFirebaseConfigInput(raw);
-      } catch {
-        return defaultFirebaseConfig;
-      }
+      return defaultFirebaseConfig;
     }
 
     function parseFirebaseConfigInput(raw) {
@@ -1051,6 +1045,7 @@
         setSyncStatus("warn", "로컬 저장");
         return;
       }
+      setSyncStatus("warn", "Firebase 연결 중");
       const config = currentConfig();
       if (!config || !config.databaseURL) {
         state.firebaseReady = false;
@@ -1083,7 +1078,12 @@
         api.onValue(state.dbRef, (snapshot) => {
           state.suppressSave = true;
           const data = snapshot.val();
+          const localItems = state.subscriptions.slice();
           state.subscriptions = Array.isArray(data) ? data : [];
+          if (!state.subscriptions.length && localItems.length) {
+            state.subscriptions = localItems;
+            api.set(state.dbRef, state.subscriptions);
+          }
           saveLocal();
           render();
           state.suppressSave = false;
