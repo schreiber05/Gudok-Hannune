@@ -6,19 +6,23 @@
   <title>구독한눈에</title>
   <style>
     :root {
-      --bg: #f5f7f4;
-      --ink: #17211b;
-      --muted: #68746d;
-      --line: #dfe6df;
-      --panel: #ffffff;
-      --green: #2f7d59;
-      --green-dark: #1f5d42;
-      --mint: #dff1e6;
+      --bg: #e8ebef;
+      --ink: #20242b;
+      --muted: #667085;
+      --line: #cfd5dd;
+      --panel: #f8fafc;
+      --green: #4f6f9f;
+      --green-dark: #3f5d87;
+      --mint: #e7edf6;
       --yellow: #f6c85f;
-      --red: #d95f59;
-      --blue: #4978c7;
-      --violet: #7a63b8;
-      --shadow: 0 18px 45px rgba(30, 48, 38, 0.12);
+      --red: #f06f67;
+      --blue: #5b8def;
+      --violet: #9b7bdb;
+      --low: #64d2a6;
+      --mid: #f6c85f;
+      --high: #ff8f70;
+      --premium: #c69cff;
+      --shadow: 0 18px 45px rgba(46, 56, 70, 0.16);
       font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
@@ -50,21 +54,7 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 12px;
       min-width: 0;
-    }
-
-    .logo {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      color: white;
-      background: linear-gradient(135deg, var(--green), #244c7f);
-      font-weight: 900;
-      letter-spacing: 0;
-      flex: 0 0 auto;
     }
 
     h1 {
@@ -82,7 +72,7 @@
       border: 1px solid var(--line);
       border-radius: 999px;
       color: var(--muted);
-      background: rgba(255,255,255,0.72);
+      background: rgba(248,250,252,0.82);
       white-space: nowrap;
       font-size: 0.9rem;
     }
@@ -91,7 +81,7 @@
       width: 8px;
       height: 8px;
       border-radius: 999px;
-      background: #9aa59f;
+      background: #9aa3af;
     }
     .dot.on { background: var(--green); }
     .dot.warn { background: var(--yellow); }
@@ -114,7 +104,7 @@
       justify-content: center;
       gap: 8px;
       color: var(--ink);
-      background: white;
+      background: #ffffff;
       box-shadow: 0 1px 0 rgba(20,20,20,0.04);
     }
 
@@ -125,9 +115,9 @@
     .btn.primary:hover { background: var(--green-dark); }
     .btn.ghost {
       border-color: var(--line);
-      background: rgba(255,255,255,0.75);
+      background: rgba(248,250,252,0.84);
     }
-    .btn.danger { color: #9e302b; }
+    .btn.danger { color: #a3423b; }
     .icon-btn {
       width: 38px;
       height: 38px;
@@ -156,8 +146,8 @@
 
     .summary.featured {
       color: white;
-      background: #173d2c;
-      border-color: #173d2c;
+      background: linear-gradient(135deg, #3f5d87, #2d3a4e);
+      border-color: #3f5d87;
       box-shadow: var(--shadow);
     }
 
@@ -211,7 +201,7 @@
       gap: 4px;
       padding: 4px;
       border-radius: 8px;
-      background: #edf2ed;
+      background: #dfe4ea;
     }
 
     .tab {
@@ -224,7 +214,7 @@
     }
     .tab.active {
       color: var(--ink);
-      background: white;
+      background: #ffffff;
       box-shadow: 0 1px 4px rgba(20,20,20,0.08);
     }
 
@@ -237,7 +227,8 @@
 
     .field, .select {
       border: 1px solid var(--line);
-      background: white;
+      background: #ffffff;
+      color: var(--ink);
       border-radius: 8px;
       min-height: 40px;
       padding: 0 11px;
@@ -245,7 +236,7 @@
     }
     .field:focus, .select:focus, textarea:focus {
       border-color: var(--green);
-      box-shadow: 0 0 0 3px rgba(47,125,89,0.13);
+      box-shadow: 0 0 0 3px rgba(91,141,239,0.18);
     }
 
     .list {
@@ -265,14 +256,19 @@
       gap: 12px;
       padding: 16px;
       border-bottom: 1px solid var(--line);
-      background: white;
+      border-left: 4px solid transparent;
+      background: var(--panel);
     }
+    .sub-card.price-low { border-left-color: var(--low); }
+    .sub-card.price-mid { border-left-color: var(--mid); }
+    .sub-card.price-high { border-left-color: var(--high); }
+    .sub-card.price-premium { border-left-color: var(--premium); }
     .sub-card:last-child { border-bottom: 0; }
     .sub-card.soon {
-      background: linear-gradient(90deg, rgba(246,200,95,0.25), white 42%);
+      background: linear-gradient(90deg, rgba(246,200,95,0.16), var(--panel) 48%);
     }
     .sub-card.overdue {
-      background: linear-gradient(90deg, rgba(217,95,89,0.18), white 42%);
+      background: linear-gradient(90deg, rgba(240,111,103,0.18), var(--panel) 48%);
     }
     .sub-card.cancelled { opacity: 0.64; }
 
@@ -312,14 +308,44 @@
       min-height: 24px;
       padding: 0 8px;
       border-radius: 999px;
-      background: #eef3f0;
+      background: #eef2f6;
       color: var(--muted);
       font-size: 0.78rem;
       white-space: nowrap;
     }
-    .badge.soon { color: #795100; background: #fff0ca; }
-    .badge.danger { color: #9e302b; background: #ffe0dc; }
-    .badge.ok { color: var(--green-dark); background: var(--mint); }
+    .badge.soon { color: #7b5400; background: #fff0ca; }
+    .badge.danger { color: #a3423b; background: #ffe0dc; }
+    .badge.ok { color: #3f5d87; background: var(--mint); }
+
+    .price-chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-weight: 850;
+      border: 1px solid transparent;
+    }
+    .price-chip.low {
+      color: #0f6b4d;
+      background: rgba(100, 210, 166, 0.20);
+      border-color: rgba(100, 210, 166, 0.35);
+    }
+    .price-chip.mid {
+      color: #735100;
+      background: rgba(246, 200, 95, 0.22);
+      border-color: rgba(246, 200, 95, 0.36);
+    }
+    .price-chip.high {
+      color: #9a3b24;
+      background: rgba(255, 143, 112, 0.22);
+      border-color: rgba(255, 143, 112, 0.38);
+    }
+    .price-chip.premium {
+      color: #6645a3;
+      background: rgba(198, 156, 255, 0.22);
+      border-color: rgba(198, 156, 255, 0.38);
+    }
 
     .meta {
       display: flex;
@@ -331,7 +357,7 @@
 
     .memo {
       margin-top: 8px;
-      color: #4b5650;
+      color: #596273;
       font-size: 0.9rem;
       line-height: 1.5;
     }
@@ -349,7 +375,7 @@
 
     .side-section {
       padding: 16px;
-      background: white;
+      background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 8px;
     }
@@ -370,13 +396,13 @@
       justify-content: space-between;
       gap: 8px;
       font-size: 0.88rem;
-      color: #344039;
+      color: #3d4654;
     }
     .bar {
       height: 10px;
       border-radius: 999px;
       overflow: hidden;
-      background: #edf2ed;
+      background: #dfe4ea;
     }
     .bar span {
       display: block;
@@ -404,9 +430,11 @@
       border: 0;
       border-radius: 8px;
       padding: 0;
+      color: var(--ink);
+      background: var(--panel);
       box-shadow: var(--shadow);
     }
-    dialog::backdrop { background: rgba(15,24,19,0.48); }
+    dialog::backdrop { background: rgba(38,45,55,0.48); }
 
     .modal-head {
       padding: 18px;
@@ -433,13 +461,15 @@
     .form-row.full { grid-column: 1 / -1; }
     label {
       font-size: 0.86rem;
-      color: #3d4842;
+      color: #3d4654;
       font-weight: 700;
     }
     textarea {
       min-height: 86px;
       resize: vertical;
       border: 1px solid var(--line);
+      color: var(--ink);
+      background: #ffffff;
       border-radius: 8px;
       padding: 10px 11px;
       outline: none;
@@ -458,7 +488,7 @@
       padding: 12px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #f7faf7;
+      background: #eef2f6;
     }
 
     .quick-add-title {
@@ -466,7 +496,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      color: #3d4842;
+      color: #3d4654;
       font-weight: 800;
       font-size: 0.9rem;
     }
@@ -483,7 +513,7 @@
       padding: 10px;
       min-height: 64px;
       text-align: left;
-      background: white;
+      background: #ffffff;
       display: grid;
       align-content: center;
       gap: 3px;
@@ -530,7 +560,7 @@
       height: 12px;
       border-radius: 999px;
       overflow: hidden;
-      background: #edf2ed;
+      background: #dfe4ea;
     }
 
     .chart-track span {
@@ -574,7 +604,7 @@
       min-width: min(420px, calc(100% - 30px));
       padding: 12px 14px;
       color: white;
-      background: #17211b;
+      background: #070a0f;
       border-radius: 8px;
       box-shadow: var(--shadow);
       transition: 180ms ease;
@@ -615,7 +645,6 @@
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <div class="logo" aria-hidden="true">구</div>
         <div>
           <h1>구독한눈에</h1>
           <div class="sync-pill" title="저장 상태"><span id="syncDot" class="dot warn"></span><span id="syncText">로컬 저장</span></div>
@@ -821,7 +850,7 @@
       { name: "음악", color: "#4978c7", mark: "M" },
       { name: "인공지능", color: "#7a63b8", mark: "AI" },
       { name: "쇼핑", color: "#d2913a", mark: "S" },
-      { name: "클라우드", color: "#2f7d59", mark: "C" },
+      { name: "클라우드", color: "#2a9fbf", mark: "C" },
       { name: "기타", color: "#59646b", mark: "E" }
     ];
 
@@ -900,6 +929,14 @@
     function monthlyAmount(item) {
       const amount = Number(item.amount) || 0;
       return item.cycle === "annual" ? amount / 12 : amount;
+    }
+
+    function priceTier(item) {
+      const amount = monthlyAmount(item);
+      if (amount >= 30000) return "premium";
+      if (amount >= 15000) return "high";
+      if (amount >= 8000) return "mid";
+      return "low";
     }
 
     function won(value) {
@@ -1084,12 +1121,13 @@
         const badgeClass = item.cancelled ? "danger" : days < 0 ? "danger" : days <= 7 ? "soon" : "ok";
         const cycle = item.cycle === "annual" ? "연간" : "월간";
         const payText = item.cycle === "annual" ? `${won(item.amount)} / 연` : `${won(item.amount)} / 월`;
+        const priceClass = priceTier(item);
         const remindDays = Number(item.remindDays ?? 7);
         const alertBadge = !item.cancelled && days >= 0 && days <= remindDays ? `<span class="badge soon">알림</span>` : "";
         const usageBadge = item.usage === "rarely" ? `<span class="badge danger">자주 안 씀</span>` : "";
         const memo = item.memo ? `<div class="memo">${escapeHtml(item.memo)}</div>` : "";
         return `
-          <article class="sub-card ${stateClass}">
+          <article class="sub-card price-${priceClass} ${stateClass}">
             <div class="sub-main">
               <div class="cat-mark" style="background:${cat.color}">${cat.mark}</div>
               <div>
@@ -1101,7 +1139,7 @@
                   ${usageBadge}
                 </div>
                 <div class="meta">
-                  <span>${payText}</span>
+                  <span class="price-chip ${priceClass}">${payText}</span>
                   <span>${cycle}</span>
                   <span>${item.nextDate}</span>
                   <span>월평균 ${won(monthlyAmount(item))}</span>
