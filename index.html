@@ -865,6 +865,17 @@
       { name: "기타 구독", amount: 0, cycle: "monthly", category: "기타", memo: "" }
     ];
 
+    const defaultFirebaseConfig = {
+      apiKey: "AIzaSyAnVP1YCtLOWgSm88Y1HvepUgxG-wfOsv0",
+      authDomain: "gudok-hannune.firebaseapp.com",
+      databaseURL: "https://gudok-hannune-b801c-default-rtdb.firebaseio.com",
+      projectId: "gudok-hannune",
+      storageBucket: "gudok-hannune.firebasestorage.app",
+      messagingSenderId: "56639635345",
+      appId: "1:56639635345:web:c5f9b3071fa1876551a430",
+      measurementId: "G-WM6F6DVNE3"
+    };
+
     const sampleSubscriptions = [];
 
     const state = {
@@ -999,11 +1010,11 @@
 
     function currentConfig() {
       const raw = localStorage.getItem(storageKeys.config);
-      if (!raw) return null;
+      if (!raw) return defaultFirebaseConfig;
       try {
         return parseFirebaseConfigInput(raw);
       } catch {
-        return null;
+        return defaultFirebaseConfig;
       }
     }
 
@@ -1025,7 +1036,7 @@
     }
 
     function mode() {
-      return localStorage.getItem(storageKeys.mode) || "local";
+      return "firebase";
     }
 
     function setSyncStatus(type, text) {
@@ -1086,7 +1097,7 @@
       } catch (error) {
         state.firebaseReady = false;
         setSyncStatus("off", "동기화 오류");
-        showToast(error.message || "Firebase 설정을 확인해 주세요.");
+        showToast(error.code || error.message || "Firebase 설정을 확인해 주세요.");
       }
     }
 
@@ -1348,7 +1359,7 @@
     }
 
     function openConfig() {
-      $("#firebaseConfig").value = localStorage.getItem(storageKeys.config) || "";
+      $("#firebaseConfig").value = localStorage.getItem(storageKeys.config) || JSON.stringify(defaultFirebaseConfig, null, 2);
       $("#workspaceId").value = workspaceId();
       $("#syncMode").value = mode();
       configDialog.showModal();
