@@ -1,0 +1,1406 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>구독한눈에</title>
+  <style>
+    :root {
+      --bg: #f5f7f4;
+      --ink: #17211b;
+      --muted: #68746d;
+      --line: #dfe6df;
+      --panel: #ffffff;
+      --green: #2f7d59;
+      --green-dark: #1f5d42;
+      --mint: #dff1e6;
+      --yellow: #f6c85f;
+      --red: #d95f59;
+      --blue: #4978c7;
+      --violet: #7a63b8;
+      --shadow: 0 18px 45px rgba(30, 48, 38, 0.12);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      min-height: 100vh;
+    }
+
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 42px;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: white;
+      background: linear-gradient(135deg, var(--green), #244c7f);
+      font-weight: 900;
+      letter-spacing: 0;
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.45rem, 2.6vw, 2.2rem);
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .sync-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(255,255,255,0.72);
+      white-space: nowrap;
+      font-size: 0.9rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #9aa59f;
+    }
+    .dot.on { background: var(--green); }
+    .dot.warn { background: var(--yellow); }
+    .dot.off { background: var(--red); }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      min-height: 42px;
+      padding: 0 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--ink);
+      background: white;
+      box-shadow: 0 1px 0 rgba(20,20,20,0.04);
+    }
+
+    .btn.primary {
+      color: white;
+      background: var(--green);
+    }
+    .btn.primary:hover { background: var(--green-dark); }
+    .btn.ghost {
+      border-color: var(--line);
+      background: rgba(255,255,255,0.75);
+    }
+    .btn.danger { color: #9e302b; }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border-radius: 8px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.2fr repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .summary {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 116px;
+      box-shadow: 0 1px 0 rgba(20,20,20,0.03);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .summary.featured {
+      color: white;
+      background: #173d2c;
+      border-color: #173d2c;
+      box-shadow: var(--shadow);
+    }
+
+    .label {
+      color: inherit;
+      opacity: 0.76;
+      font-size: 0.88rem;
+      margin-bottom: 12px;
+    }
+
+    .value {
+      font-size: clamp(1.35rem, 2.5vw, 2rem);
+      font-weight: 850;
+      letter-spacing: 0;
+      word-break: keep-all;
+    }
+
+    .subvalue {
+      color: var(--muted);
+      font-size: 0.86rem;
+      margin-top: 8px;
+    }
+    .featured .subvalue { color: rgba(255,255,255,0.78); }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .tabs, .segmented {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      border-radius: 8px;
+      background: #edf2ed;
+    }
+
+    .tab {
+      border: 0;
+      border-radius: 7px;
+      padding: 8px 11px;
+      color: var(--muted);
+      background: transparent;
+      min-width: 58px;
+    }
+    .tab.active {
+      color: var(--ink);
+      background: white;
+      box-shadow: 0 1px 4px rgba(20,20,20,0.08);
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .field, .select {
+      border: 1px solid var(--line);
+      background: white;
+      border-radius: 8px;
+      min-height: 40px;
+      padding: 0 11px;
+      outline: none;
+    }
+    .field:focus, .select:focus, textarea:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(47,125,89,0.13);
+    }
+
+    .list {
+      display: grid;
+      gap: 0;
+    }
+
+    .empty {
+      padding: 42px 18px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .sub-card {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+      background: white;
+    }
+    .sub-card:last-child { border-bottom: 0; }
+    .sub-card.soon {
+      background: linear-gradient(90deg, rgba(246,200,95,0.25), white 42%);
+    }
+    .sub-card.overdue {
+      background: linear-gradient(90deg, rgba(217,95,89,0.18), white 42%);
+    }
+    .sub-card.cancelled { opacity: 0.64; }
+
+    .sub-main {
+      display: flex;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .cat-mark {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-weight: 850;
+      flex: 0 0 auto;
+      background: var(--blue);
+    }
+
+    .sub-title {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .sub-title strong {
+      font-size: 1.02rem;
+      word-break: break-word;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      background: #eef3f0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      white-space: nowrap;
+    }
+    .badge.soon { color: #795100; background: #fff0ca; }
+    .badge.danger { color: #9e302b; background: #ffe0dc; }
+    .badge.ok { color: var(--green-dark); background: var(--mint); }
+
+    .meta {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .memo {
+      margin-top: 8px;
+      color: #4b5650;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .sub-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .side {
+      display: grid;
+      gap: 16px;
+    }
+
+    .side-section {
+      padding: 16px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    .side-section h2 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+      letter-spacing: 0;
+    }
+
+    .bars { display: grid; gap: 12px; }
+    .bar-row {
+      display: grid;
+      gap: 6px;
+    }
+    .bar-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.88rem;
+      color: #344039;
+    }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #edf2ed;
+    }
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--green);
+      width: 0%;
+    }
+
+    .month-list {
+      display: grid;
+      gap: 10px;
+    }
+    .month-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    dialog {
+      width: min(720px, calc(100% - 28px));
+      border: 0;
+      border-radius: 8px;
+      padding: 0;
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop { background: rgba(15,24,19,0.48); }
+
+    .modal-head {
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-head h2 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+    .modal-body { padding: 18px; }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+    .form-row {
+      display: grid;
+      gap: 7px;
+    }
+    .form-row.full { grid-column: 1 / -1; }
+    label {
+      font-size: 0.86rem;
+      color: #3d4842;
+      font-weight: 700;
+    }
+    textarea {
+      min-height: 86px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      outline: none;
+    }
+    .check-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 42px;
+    }
+
+    .quick-add {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #f7faf7;
+    }
+
+    .quick-add-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: #3d4842;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .quick-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .quick-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 64px;
+      text-align: left;
+      background: white;
+      display: grid;
+      align-content: center;
+      gap: 3px;
+    }
+
+    .quick-card strong {
+      font-size: 0.88rem;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .quick-card span {
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .alert-list, .mini-chart {
+      display: grid;
+      gap: 10px;
+    }
+
+    .alert-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .alert-item:last-child { border-bottom: 0; }
+
+    .chart-row {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .chart-track {
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: #edf2ed;
+    }
+
+    .chart-track span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--blue);
+      width: 0%;
+    }
+
+    .toast button {
+      margin-left: 10px;
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 7px;
+      color: white;
+      background: transparent;
+      padding: 5px 8px;
+    }
+    .modal-actions {
+      padding: 14px 18px 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .config-code {
+      width: 100%;
+      min-height: 142px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 0.86rem;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(18px);
+      opacity: 0;
+      pointer-events: none;
+      min-width: min(420px, calc(100% - 30px));
+      padding: 12px 14px;
+      color: white;
+      background: #17211b;
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      transition: 180ms ease;
+      text-align: center;
+      z-index: 50;
+    }
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 960px) {
+      .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .main-layout { grid-template-columns: 1fr; }
+      .side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 680px) {
+      .app { width: min(100% - 20px, 1180px); padding-top: 16px; }
+      .topbar { align-items: flex-start; flex-direction: column; }
+      .toolbar { width: 100%; justify-content: stretch; }
+      .toolbar .btn { flex: 1; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .panel-head { align-items: stretch; }
+      .tabs, .filters, .segmented { width: 100%; }
+      .tab { flex: 1; }
+      .field, .select { width: 100%; }
+      .sub-card { grid-template-columns: 1fr; }
+      .sub-actions { justify-content: flex-end; }
+      .side { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">구</div>
+        <div>
+          <h1>구독한눈에</h1>
+          <div class="sync-pill" title="저장 상태"><span id="syncDot" class="dot warn"></span><span id="syncText">로컬 저장</span></div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn ghost" id="configBtn" type="button" title="Firebase 설정">설정</button>
+        <button class="btn primary" id="addBtn" type="button">구독 추가</button>
+      </div>
+    </header>
+
+    <section class="summary-grid" aria-label="구독 요약">
+      <article class="summary featured">
+        <div class="label">월평균 구독 지출</div>
+        <div>
+          <div class="value" id="monthlyTotal">0원</div>
+          <div class="subvalue" id="activeCount">이용 중 0개</div>
+        </div>
+      </article>
+      <article class="summary">
+        <div class="label">이번 달 결제 예정</div>
+        <div>
+          <div class="value" id="thisMonthTotal">0원</div>
+          <div class="subvalue" id="thisMonthCount">0개 서비스</div>
+        </div>
+      </article>
+      <article class="summary">
+        <div class="label">7일 안 결제</div>
+        <div>
+          <div class="value" id="soonCount">0개</div>
+          <div class="subvalue" id="nearestPayment">예정 없음</div>
+        </div>
+      </article>
+      <article class="summary">
+        <div class="label">연간 결제 월평균</div>
+        <div>
+          <div class="value" id="annualMonthly">0원</div>
+          <div class="subvalue" id="annualCount">0개 서비스</div>
+        </div>
+      </article>
+    </section>
+
+    <main class="main-layout">
+      <section class="panel" aria-label="구독 목록">
+        <div class="panel-head">
+          <div class="tabs" role="tablist" aria-label="목록 보기">
+            <button class="tab active" data-filter="active" type="button">이용 중</button>
+            <button class="tab" data-filter="month" type="button">이번 달</button>
+            <button class="tab" data-filter="annual" type="button">연간</button>
+            <button class="tab" data-filter="cancelled" type="button">해지</button>
+          </div>
+          <div class="filters">
+            <input class="field" id="searchInput" type="search" placeholder="서비스 검색" />
+            <select class="select" id="categoryFilter" aria-label="카테고리">
+              <option value="all">전체 카테고리</option>
+            </select>
+            <select class="select" id="sortSelect" aria-label="정렬">
+              <option value="date">결제일 가까운 순</option>
+              <option value="amount">금액 높은 순</option>
+              <option value="name">이름순</option>
+            </select>
+          </div>
+        </div>
+        <div class="list" id="subscriptionList"></div>
+      </section>
+
+      <aside class="side" aria-label="지출 분석">
+        <section class="side-section">
+          <h2>카테고리 지출</h2>
+          <div class="bars" id="categoryBars"></div>
+        </section>
+        <section class="side-section">
+          <h2>이번 달 일정</h2>
+          <div class="month-list" id="monthList"></div>
+        </section>
+        <section class="side-section">
+          <h2>결제 알림</h2>
+          <div class="alert-list" id="alertList"></div>
+        </section>
+        <section class="side-section">
+          <h2>월별 지출 그래프</h2>
+          <div class="mini-chart" id="monthlyChart"></div>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <dialog id="subscriptionDialog">
+    <form method="dialog" id="subscriptionForm">
+      <div class="modal-head">
+        <h2 id="dialogTitle">구독 추가</h2>
+        <button class="btn icon-btn ghost" value="cancel" type="button" id="closeDialog" title="닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="quick-add">
+            <div class="quick-add-title">
+              <span>빠른 추가</span>
+              <span class="subvalue">자주 쓰는 구독 정보를 자동 입력</span>
+            </div>
+            <div class="quick-grid" id="quickTemplates"></div>
+          </div>
+          <div class="form-row">
+            <label for="serviceName">서비스 이름</label>
+            <input class="field" id="serviceName" name="name" required maxlength="40" />
+          </div>
+          <div class="form-row">
+            <label for="amount">결제 금액</label>
+            <input class="field" id="amount" name="amount" type="number" min="0" step="1" required />
+          </div>
+          <div class="form-row">
+            <label for="cycle">결제 주기</label>
+            <select class="select" id="cycle" name="cycle">
+              <option value="monthly">월간</option>
+              <option value="annual">연간</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="nextDate">다음 결제일</label>
+            <input class="field" id="nextDate" name="nextDate" type="date" required />
+          </div>
+          <div class="form-row">
+            <label for="category">카테고리</label>
+            <select class="select" id="category" name="category"></select>
+          </div>
+          <div class="form-row">
+            <label for="startDate">구독 시작일</label>
+            <input class="field" id="startDate" name="startDate" type="date" />
+          </div>
+          <div class="form-row">
+            <label for="usage">사용 빈도</label>
+            <select class="select" id="usage" name="usage">
+              <option value="often">자주 사용</option>
+              <option value="sometimes">가끔 사용</option>
+              <option value="rarely">거의 사용 안 함</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="remindDays">알림 표시</label>
+            <select class="select" id="remindDays" name="remindDays">
+              <option value="1">1일 전부터</option>
+              <option value="3">3일 전부터</option>
+              <option value="7">7일 전부터</option>
+              <option value="14">14일 전부터</option>
+            </select>
+          </div>
+          <div class="form-row full">
+            <label for="memo">메모</label>
+            <textarea id="memo" name="memo" maxlength="220"></textarea>
+          </div>
+          <div class="form-row full">
+            <label class="check-row">
+              <input id="cancelled" name="cancelled" type="checkbox" />
+              해지한 구독으로 보관
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" type="button" id="cancelForm">취소</button>
+        <button class="btn primary" type="submit">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="configDialog">
+    <form method="dialog" id="configForm">
+      <div class="modal-head">
+        <h2>Firebase 설정</h2>
+        <button class="btn icon-btn ghost" type="button" id="closeConfig" title="닫기">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-row full">
+            <label for="firebaseConfig">Firebase 앱 설정</label>
+            <textarea class="config-code" id="firebaseConfig" spellcheck="false" placeholder='{"apiKey":"...","authDomain":"...","databaseURL":"https://...firebaseio.com","projectId":"...","appId":"..."}'></textarea>
+          </div>
+          <div class="form-row">
+            <label for="workspaceId">저장 공간 이름</label>
+            <input class="field" id="workspaceId" maxlength="50" />
+          </div>
+          <div class="form-row">
+            <label for="syncMode">저장 방식</label>
+            <select class="select" id="syncMode">
+              <option value="firebase">Firebase Realtime Database</option>
+              <option value="local">이 브라우저에 저장</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" type="button" id="clearConfig">설정 초기화</button>
+        <button class="btn primary" type="submit">적용</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    const categories = [
+      { name: "영상", color: "#d95f59", mark: "V" },
+      { name: "음악", color: "#4978c7", mark: "M" },
+      { name: "인공지능", color: "#7a63b8", mark: "AI" },
+      { name: "쇼핑", color: "#d2913a", mark: "S" },
+      { name: "클라우드", color: "#2f7d59", mark: "C" },
+      { name: "기타", color: "#59646b", mark: "E" }
+    ];
+
+    const quickTemplates = [
+      { name: "YouTube Premium", amount: 14900, cycle: "monthly", category: "영상", memo: "영상 구독" },
+      { name: "Netflix", amount: 17000, cycle: "monthly", category: "영상", memo: "OTT 구독" },
+      { name: "Spotify", amount: 10900, cycle: "monthly", category: "음악", memo: "음악 스트리밍" },
+      { name: "ChatGPT", amount: 29000, cycle: "monthly", category: "인공지능", memo: "AI 서비스" },
+      { name: "Coupang Wow", amount: 7890, cycle: "monthly", category: "쇼핑", memo: "쇼핑 멤버십" },
+      { name: "iCloud+", amount: 3300, cycle: "monthly", category: "클라우드", memo: "클라우드 저장 공간" },
+      { name: "Google One", amount: 24000, cycle: "annual", category: "클라우드", memo: "연간 저장 공간" },
+      { name: "기타 구독", amount: 0, cycle: "monthly", category: "기타", memo: "" }
+    ];
+
+    const sampleSubscriptions = [];
+
+    const state = {
+      subscriptions: [],
+      filter: "active",
+      search: "",
+      category: "all",
+      sort: "date",
+      editingId: null,
+      firebaseReady: false,
+      dbRef: null,
+      firebaseApi: null,
+      lastUndo: null,
+      saveTimer: null,
+      suppressSave: false
+    };
+
+    const storageKeys = {
+      subscriptions: "subscription-eye:v2:list",
+      config: "subscription-eye:firebase",
+      workspace: "subscription-eye:workspace",
+      mode: "subscription-eye:mode"
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const listEl = $("#subscriptionList");
+    const categoryFilter = $("#categoryFilter");
+    const categorySelect = $("#category");
+    const dialog = $("#subscriptionDialog");
+    const configDialog = $("#configDialog");
+    const form = $("#subscriptionForm");
+    const configForm = $("#configForm");
+    const toast = $("#toast");
+
+    function addDays(date, days) {
+      const copy = new Date(date);
+      copy.setDate(copy.getDate() + days);
+      return copy.toISOString().slice(0, 10);
+    }
+
+    function parseDate(dateString) {
+      const [y, m, d] = dateString.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function todayOnly() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    }
+
+    function daysUntil(dateString) {
+      const ms = parseDate(dateString) - todayOnly();
+      return Math.ceil(ms / 86400000);
+    }
+
+    function isThisMonth(dateString) {
+      const d = parseDate(dateString);
+      const now = new Date();
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
+
+    function monthlyAmount(item) {
+      const amount = Number(item.amount) || 0;
+      return item.cycle === "annual" ? amount / 12 : amount;
+    }
+
+    function won(value) {
+      return Math.round(value).toLocaleString("ko-KR") + "원";
+    }
+
+    function categoryInfo(name) {
+      return categories.find((cat) => cat.name === name) || categories[categories.length - 1];
+    }
+
+    function showToast(message, actionLabel = "", action = null) {
+      toast.innerHTML = "";
+      const text = document.createElement("span");
+      text.textContent = message;
+      toast.appendChild(text);
+      if (actionLabel && action) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = actionLabel;
+        button.addEventListener("click", () => {
+          action();
+          toast.classList.remove("show");
+        }, { once: true });
+        toast.appendChild(button);
+      }
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), action ? 5200 : 2100);
+    }
+
+    function seedOptions() {
+      categorySelect.innerHTML = categories.map((cat) => `<option value="${cat.name}">${cat.name}</option>`).join("");
+      categoryFilter.innerHTML = `<option value="all">전체 카테고리</option>` + categories.map((cat) => `<option value="${cat.name}">${cat.name}</option>`).join("");
+      $("#quickTemplates").innerHTML = quickTemplates.map((item) => `
+        <button class="quick-card" type="button" data-template="${escapeHtml(item.name)}">
+          <strong>${escapeHtml(item.name)}</strong>
+          <span>${escapeHtml(item.category)} · ${item.cycle === "annual" ? "연간" : "월간"} · ${item.amount ? won(item.amount) : "직접 입력"}</span>
+        </button>
+      `).join("");
+    }
+
+    function loadLocal() {
+      const saved = localStorage.getItem(storageKeys.subscriptions);
+      if (!saved) {
+        state.subscriptions = sampleSubscriptions;
+        saveLocal();
+        return;
+      }
+      try {
+        state.subscriptions = JSON.parse(saved);
+      } catch {
+        state.subscriptions = sampleSubscriptions;
+      }
+    }
+
+    function saveLocal() {
+      localStorage.setItem(storageKeys.subscriptions, JSON.stringify(state.subscriptions));
+    }
+
+    function currentConfig() {
+      const raw = localStorage.getItem(storageKeys.config);
+      if (!raw) return null;
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return null;
+      }
+    }
+
+    function workspaceId() {
+      const saved = localStorage.getItem(storageKeys.workspace);
+      return (saved || "gudok-hannune").replace(/[.#$/[\]]/g, "-").slice(0, 50);
+    }
+
+    function mode() {
+      return localStorage.getItem(storageKeys.mode) || "local";
+    }
+
+    function setSyncStatus(type, text) {
+      const dot = $("#syncDot");
+      dot.className = "dot " + type;
+      $("#syncText").textContent = text;
+    }
+
+    async function connectFirebase() {
+      if (mode() !== "firebase") {
+        state.firebaseReady = false;
+        setSyncStatus("warn", "로컬 저장");
+        return;
+      }
+      const config = currentConfig();
+      if (!config || !config.databaseURL) {
+        state.firebaseReady = false;
+        setSyncStatus("off", "Firebase 설정 필요");
+        return;
+      }
+      try {
+        if (!state.firebaseApi) {
+          const appMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js");
+          const dbMod = await import("https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js");
+          state.firebaseApi = {
+            initializeApp: appMod.initializeApp,
+            getApps: appMod.getApps,
+            getDatabase: dbMod.getDatabase,
+            ref: dbMod.ref,
+            onValue: dbMod.onValue,
+            set: dbMod.set
+          };
+        }
+        const api = state.firebaseApi;
+        const app = api.getApps().length ? api.getApps()[0] : api.initializeApp(config);
+        const db = api.getDatabase(app);
+        state.dbRef = api.ref(db, `subscriptionApps/${workspaceId()}/subscriptions`);
+        api.onValue(state.dbRef, (snapshot) => {
+          state.suppressSave = true;
+          const data = snapshot.val();
+          state.subscriptions = Array.isArray(data) ? data : [];
+          saveLocal();
+          render();
+          state.suppressSave = false;
+          setSyncStatus("on", "Firebase 동기화");
+        }, (error) => {
+          state.firebaseReady = false;
+          setSyncStatus("off", "동기화 오류");
+          showToast(error.message || "Firebase 연결을 확인해 주세요.");
+        });
+        state.firebaseReady = true;
+      } catch (error) {
+        state.firebaseReady = false;
+        setSyncStatus("off", "동기화 오류");
+        showToast(error.message || "Firebase 설정을 확인해 주세요.");
+      }
+    }
+
+    function persist() {
+      saveLocal();
+      if (!state.firebaseReady || !state.dbRef || state.suppressSave) return;
+      clearTimeout(state.saveTimer);
+      state.saveTimer = setTimeout(() => {
+        state.firebaseApi.set(state.dbRef, state.subscriptions).catch((error) => {
+          setSyncStatus("off", "동기화 오류");
+          showToast(error.message || "저장 중 오류가 발생했습니다.");
+        });
+      }, 180);
+    }
+
+    function filteredSubscriptions() {
+      const term = state.search.trim().toLowerCase();
+      return state.subscriptions
+        .filter((item) => {
+          if (state.filter === "active" && item.cancelled) return false;
+          if (state.filter === "cancelled" && !item.cancelled) return false;
+          if (state.filter === "month" && (item.cancelled || !isThisMonth(item.nextDate))) return false;
+          if (state.filter === "annual" && (item.cancelled || item.cycle !== "annual")) return false;
+          if (state.category !== "all" && item.category !== state.category) return false;
+          if (term && !`${item.name} ${item.memo || ""}`.toLowerCase().includes(term)) return false;
+          return true;
+        })
+        .sort((a, b) => {
+          if (state.sort === "amount") return monthlyAmount(b) - monthlyAmount(a);
+          if (state.sort === "name") return a.name.localeCompare(b.name, "ko-KR");
+          return daysUntil(a.nextDate) - daysUntil(b.nextDate);
+        });
+    }
+
+    function ddayText(days) {
+      if (days === 0) return "오늘";
+      if (days > 0) return `D-${days}`;
+      return `${Math.abs(days)}일 지남`;
+    }
+
+    function renderList() {
+      const items = filteredSubscriptions();
+      if (!items.length) {
+        listEl.innerHTML = `<div class="empty">표시할 구독이 없습니다.</div>`;
+        return;
+      }
+      listEl.innerHTML = items.map((item) => {
+        const days = daysUntil(item.nextDate);
+        const cat = categoryInfo(item.category);
+        const stateClass = item.cancelled ? "cancelled" : days < 0 ? "overdue" : days <= 7 ? "soon" : "";
+        const badgeClass = item.cancelled ? "danger" : days < 0 ? "danger" : days <= 7 ? "soon" : "ok";
+        const cycle = item.cycle === "annual" ? "연간" : "월간";
+        const payText = item.cycle === "annual" ? `${won(item.amount)} / 연` : `${won(item.amount)} / 월`;
+        const remindDays = Number(item.remindDays ?? 7);
+        const alertBadge = !item.cancelled && days >= 0 && days <= remindDays ? `<span class="badge soon">알림</span>` : "";
+        const usageBadge = item.usage === "rarely" ? `<span class="badge danger">자주 안 씀</span>` : "";
+        const memo = item.memo ? `<div class="memo">${escapeHtml(item.memo)}</div>` : "";
+        return `
+          <article class="sub-card ${stateClass}">
+            <div class="sub-main">
+              <div class="cat-mark" style="background:${cat.color}">${cat.mark}</div>
+              <div>
+                <div class="sub-title">
+                  <strong>${escapeHtml(item.name)}</strong>
+                  <span class="badge ${badgeClass}">${item.cancelled ? "해지" : ddayText(days)}</span>
+                  <span class="badge">${escapeHtml(item.category)}</span>
+                  ${alertBadge}
+                  ${usageBadge}
+                </div>
+                <div class="meta">
+                  <span>${payText}</span>
+                  <span>${cycle}</span>
+                  <span>${item.nextDate}</span>
+                  <span>월평균 ${won(monthlyAmount(item))}</span>
+                </div>
+                ${memo}
+              </div>
+            </div>
+            <div class="sub-actions">
+              <button class="btn icon-btn ghost" type="button" title="수정" data-action="edit" data-id="${item.id}">✎</button>
+              <button class="btn icon-btn ghost" type="button" title="${item.cancelled ? "복구" : "해지"}" data-action="toggle" data-id="${item.id}">${item.cancelled ? "↺" : "✓"}</button>
+              <button class="btn icon-btn ghost danger" type="button" title="삭제" data-action="delete" data-id="${item.id}">×</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, (ch) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[ch]);
+    }
+
+    function renderSummary() {
+      const active = state.subscriptions.filter((item) => !item.cancelled);
+      const monthly = active.reduce((sum, item) => sum + monthlyAmount(item), 0);
+      const monthItems = active.filter((item) => isThisMonth(item.nextDate));
+      const thisMonthTotal = monthItems.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      const soonItems = active.filter((item) => {
+        const days = daysUntil(item.nextDate);
+        return days >= 0 && days <= 7;
+      });
+      const annualItems = active.filter((item) => item.cycle === "annual");
+      const annualMonthly = annualItems.reduce((sum, item) => sum + monthlyAmount(item), 0);
+      const nearest = active.slice().sort((a, b) => daysUntil(a.nextDate) - daysUntil(b.nextDate))[0];
+
+      $("#monthlyTotal").textContent = won(monthly);
+      $("#activeCount").textContent = `이용 중 ${active.length}개`;
+      $("#thisMonthTotal").textContent = won(thisMonthTotal);
+      $("#thisMonthCount").textContent = `${monthItems.length}개 서비스`;
+      $("#soonCount").textContent = `${soonItems.length}개`;
+      $("#nearestPayment").textContent = nearest ? `${nearest.name} ${ddayText(daysUntil(nearest.nextDate))}` : "예정 없음";
+      $("#annualMonthly").textContent = won(annualMonthly);
+      $("#annualCount").textContent = `${annualItems.length}개 서비스`;
+    }
+
+    function renderCategoryBars() {
+      const active = state.subscriptions.filter((item) => !item.cancelled);
+      const totals = categories.map((cat) => ({
+        ...cat,
+        total: active.filter((item) => item.category === cat.name).reduce((sum, item) => sum + monthlyAmount(item), 0)
+      })).filter((cat) => cat.total > 0);
+      const max = Math.max(...totals.map((cat) => cat.total), 1);
+      $("#categoryBars").innerHTML = totals.length ? totals.map((cat) => `
+        <div class="bar-row">
+          <div class="bar-top"><span>${cat.name}</span><strong>${won(cat.total)}</strong></div>
+          <div class="bar"><span style="width:${(cat.total / max) * 100}%; background:${cat.color}"></span></div>
+        </div>
+      `).join("") : `<div class="empty">분석할 지출이 없습니다.</div>`;
+    }
+
+    function renderMonthList() {
+      const items = state.subscriptions
+        .filter((item) => !item.cancelled && isThisMonth(item.nextDate))
+        .sort((a, b) => daysUntil(a.nextDate) - daysUntil(b.nextDate));
+      $("#monthList").innerHTML = items.length ? items.map((item) => `
+        <div class="month-item">
+          <span>${escapeHtml(item.name)}</span>
+          <strong>${item.nextDate.slice(5)} · ${won(item.amount)}</strong>
+        </div>
+      `).join("") : `<div class="empty">이번 달 결제가 없습니다.</div>`;
+    }
+
+    function renderAlertList() {
+      const items = state.subscriptions
+        .filter((item) => {
+          if (item.cancelled) return false;
+          const days = daysUntil(item.nextDate);
+          return days >= 0 && days <= Number(item.remindDays ?? 7);
+        })
+        .sort((a, b) => daysUntil(a.nextDate) - daysUntil(b.nextDate));
+      $("#alertList").innerHTML = items.length ? items.map((item) => `
+        <div class="alert-item">
+          <span>${escapeHtml(item.name)}</span>
+          <strong>${ddayText(daysUntil(item.nextDate))}</strong>
+        </div>
+      `).join("") : `<div class="empty">표시할 알림이 없습니다.</div>`;
+    }
+
+    function nextPaymentInMonth(item, monthOffset) {
+      const target = new Date(todayOnly().getFullYear(), todayOnly().getMonth() + monthOffset, 1);
+      const payment = parseDate(item.nextDate);
+      if (item.cycle === "monthly") return true;
+      return payment.getFullYear() === target.getFullYear() && payment.getMonth() === target.getMonth();
+    }
+
+    function renderMonthlyChart() {
+      const active = state.subscriptions.filter((item) => !item.cancelled);
+      const rows = Array.from({ length: 6 }, (_, index) => {
+        const date = new Date(todayOnly().getFullYear(), todayOnly().getMonth() + index, 1);
+        const label = `${date.getMonth() + 1}월`;
+        const total = active.reduce((sum, item) => sum + (nextPaymentInMonth(item, index) ? Number(item.amount || 0) : 0), 0);
+        return { label, total };
+      });
+      const max = Math.max(...rows.map((row) => row.total), 1);
+      $("#monthlyChart").innerHTML = rows.map((row) => `
+        <div class="chart-row">
+          <span>${row.label}</span>
+          <div class="chart-track"><span style="width:${(row.total / max) * 100}%"></span></div>
+          <strong>${won(row.total)}</strong>
+        </div>
+      `).join("");
+    }
+
+    function render() {
+      renderSummary();
+      renderList();
+      renderCategoryBars();
+      renderMonthList();
+      renderAlertList();
+      renderMonthlyChart();
+    }
+
+    function openForm(item = null) {
+      state.editingId = item?.id || null;
+      $("#dialogTitle").textContent = item ? "구독 수정" : "구독 추가";
+      form.reset();
+      $("#serviceName").value = item?.name || "";
+      $("#amount").value = item?.amount || "";
+      $("#cycle").value = item?.cycle || "monthly";
+      $("#nextDate").value = item?.nextDate || addDays(new Date(), 30);
+      $("#category").value = item?.category || "영상";
+      $("#startDate").value = item?.startDate || "";
+      $("#usage").value = item?.usage || "often";
+      $("#remindDays").value = String(item?.remindDays ?? 7);
+      $("#memo").value = item?.memo || "";
+      $("#cancelled").checked = Boolean(item?.cancelled);
+      dialog.showModal();
+    }
+
+    function formDataToItem() {
+      return {
+        id: state.editingId || crypto.randomUUID(),
+        name: $("#serviceName").value.trim(),
+        amount: Number($("#amount").value),
+        cycle: $("#cycle").value,
+        nextDate: $("#nextDate").value,
+        startDate: $("#startDate").value,
+        category: $("#category").value,
+        usage: $("#usage").value,
+        remindDays: Number($("#remindDays").value),
+        memo: $("#memo").value.trim(),
+        cancelled: $("#cancelled").checked,
+        createdAt: state.editingId ? state.subscriptions.find((item) => item.id === state.editingId)?.createdAt || Date.now() : Date.now(),
+        updatedAt: Date.now()
+      };
+    }
+
+    function deleteItem(id) {
+      const item = state.subscriptions.find((sub) => sub.id === id);
+      if (!item) return;
+      if (!confirm(`${item.name}을(를) 삭제할까요?`)) return;
+      state.subscriptions = state.subscriptions.filter((sub) => sub.id !== id);
+      persist();
+      render();
+      showToast("삭제했습니다.");
+    }
+
+    function toggleCancelled(id) {
+      const before = state.subscriptions.find((item) => item.id === id);
+      if (!before) return;
+      const after = { ...before, cancelled: !before.cancelled, updatedAt: Date.now() };
+      state.lastUndo = { type: "toggle", item: before };
+      state.subscriptions = state.subscriptions.map((item) => item.id === id ? after : item);
+      persist();
+      render();
+      showToast(after.cancelled ? "해지로 표시했습니다." : "다시 이용 중으로 복구했습니다.", "되돌리기", () => {
+        state.subscriptions = state.subscriptions.map((item) => item.id === id ? before : item);
+        persist();
+        render();
+        showToast("되돌렸습니다.");
+      });
+    }
+
+    function openConfig() {
+      $("#firebaseConfig").value = localStorage.getItem(storageKeys.config) || "";
+      $("#workspaceId").value = workspaceId();
+      $("#syncMode").value = mode();
+      configDialog.showModal();
+    }
+
+    function applyTemplate(name) {
+      const item = quickTemplates.find((template) => template.name === name);
+      if (!item) return;
+      $("#serviceName").value = item.name === "기타 구독" ? "" : item.name;
+      $("#amount").value = item.amount || "";
+      $("#cycle").value = item.cycle;
+      $("#category").value = item.category;
+      $("#nextDate").value = addDays(new Date(), item.cycle === "annual" ? 365 : 30);
+      $("#usage").value = "often";
+      $("#remindDays").value = item.cycle === "annual" ? "14" : "7";
+      $("#memo").value = item.memo;
+      $("#serviceName").focus();
+    }
+
+    $(".tabs").addEventListener("click", (event) => {
+      const button = event.target.closest(".tab");
+      if (!button) return;
+      document.querySelectorAll(".tab").forEach((tab) => tab.classList.remove("active"));
+      button.classList.add("active");
+      state.filter = button.dataset.filter;
+      render();
+    });
+
+    listEl.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-action]");
+      if (!button) return;
+      const { action, id } = button.dataset;
+      if (action === "edit") openForm(state.subscriptions.find((item) => item.id === id));
+      if (action === "toggle") toggleCancelled(id);
+      if (action === "delete") deleteItem(id);
+    });
+
+    $("#quickTemplates").addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-template]");
+      if (!button) return;
+      applyTemplate(button.dataset.template);
+    });
+
+    $("#addBtn").addEventListener("click", () => openForm());
+    $("#configBtn").addEventListener("click", openConfig);
+    $("#searchInput").addEventListener("input", (event) => {
+      state.search = event.target.value;
+      render();
+    });
+    $("#categoryFilter").addEventListener("change", (event) => {
+      state.category = event.target.value;
+      render();
+    });
+    $("#sortSelect").addEventListener("change", (event) => {
+      state.sort = event.target.value;
+      render();
+    });
+    $("#closeDialog").addEventListener("click", () => dialog.close());
+    $("#cancelForm").addEventListener("click", () => dialog.close());
+    $("#closeConfig").addEventListener("click", () => configDialog.close());
+    $("#clearConfig").addEventListener("click", () => {
+      localStorage.removeItem(storageKeys.config);
+      localStorage.setItem(storageKeys.mode, "local");
+      setSyncStatus("warn", "로컬 저장");
+      configDialog.close();
+      showToast("Firebase 설정을 초기화했습니다.");
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const item = formDataToItem();
+      if (!item.name || !item.nextDate) return;
+      if (state.editingId) {
+        state.subscriptions = state.subscriptions.map((sub) => sub.id === state.editingId ? item : sub);
+        showToast("수정했습니다.");
+      } else {
+        state.subscriptions = [item, ...state.subscriptions];
+        showToast("추가했습니다.");
+      }
+      persist();
+      render();
+      dialog.close();
+    });
+
+    configForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const raw = $("#firebaseConfig").value.trim();
+      const selectedMode = $("#syncMode").value;
+      if (selectedMode === "firebase") {
+        try {
+          JSON.parse(raw);
+        } catch {
+          showToast("Firebase 설정은 JSON 형식으로 입력해 주세요.");
+          return;
+        }
+        localStorage.setItem(storageKeys.config, raw);
+      }
+      localStorage.setItem(storageKeys.workspace, $("#workspaceId").value.trim() || "gudok-hannune");
+      localStorage.setItem(storageKeys.mode, selectedMode);
+      configDialog.close();
+      await connectFirebase();
+      if (selectedMode === "firebase" && state.firebaseReady) persist();
+      showToast("설정을 적용했습니다.");
+    });
+
+    seedOptions();
+    loadLocal();
+    render();
+    connectFirebase();
+  </script>
+</body>
+</html>
